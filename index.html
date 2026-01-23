@@ -1,0 +1,877 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Barista 4:6 Pro - V60 Calculator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            /* Paleta de colores Latte & Espresso */
+            --bg-grad-start: #fdfbf7;
+            --bg-grad-end: #e6ded5;
+            --card-bg: #ffffff;
+            --primary-text: #3e2723;
+            --accent-color: #d7ccc8;
+            --highlight: #795548;
+            --btn-bg: #4e342e;
+            --btn-hover: #6d4c41;
+            --info-bg: #efebe9;
+            --border-radius: 16px;
+            --success: #2e7d32;
+            --danger: #c62828; /* Color para eliminar */
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, var(--bg-grad-start) 0%, var(--bg-grad-end) 100%);
+            color: var(--primary-text);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            background-color: var(--card-bg);
+            padding: 35px;
+            border-radius: var(--border-radius);
+            box-shadow: 0 15px 35px rgba(62, 39, 35, 0.15);
+            max-width: 600px;
+            width: 100%;
+            transition: max-height 0.3s ease;
+            position: relative;
+            overflow: hidden; /* Para contener las animaciones */
+        }
+
+        /* Animación Suave de Transición entre Vistas */
+        .fade-in {
+            animation: fadeIn 0.4s ease-out forwards;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Encabezado */
+        header { text-align: center; margin-bottom: 15px; }
+        h1 { margin: 0; color: var(--primary-text); font-size: 1.8em; }
+        .subtitle { color: #8d6e63; font-size: 0.9em; margin-bottom: 20px;}
+
+        /* --- TABS --- */
+        .tab-menu {
+            display: flex;
+            justify-content: center;
+            background-color: var(--info-bg);
+            border-radius: 12px;
+            padding: 5px;
+            margin-bottom: 25px;
+            gap: 5px;
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 8px;
+            background: transparent;
+            color: #8d6e63;
+            font-weight: 600;
+            font-family: inherit;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9em;
+        }
+
+        .tab-btn.active {
+            background-color: var(--card-bg);
+            color: var(--btn-bg);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        /* Animación de Guardado Exitoso */
+        @keyframes tabPulse {
+            0% { background-color: var(--card-bg); color: var(--btn-bg); transform: scale(1); }
+            50% { background-color: var(--success); color: white; transform: scale(1.1); }
+            100% { background-color: var(--card-bg); color: var(--btn-bg); transform: scale(1); }
+        }
+        .tab-success {
+            animation: tabPulse 1s ease;
+        }
+
+        /* Secciones de Inputs */
+        .section-title {
+            font-size: 0.85em;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #a1887f;
+            margin-bottom: 10px;
+            border-bottom: 1px solid #d7ccc8;
+            padding-bottom: 5px;
+            margin-top: 20px;
+        }
+
+        .row { display: flex; gap: 15px; margin-bottom: 15px; }
+        .col { flex: 1; }
+        label { display: block; margin-bottom: 6px; font-size: 0.9em; font-weight: 600; }
+        
+        input, select, textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #d7ccc8;
+            border-radius: 8px;
+            background-color: #fffefe;
+            color: var(--primary-text);
+            font-family: inherit;
+            box-sizing: border-box;
+        }
+        input:focus, select:focus, textarea:focus { outline: none; border-color: var(--highlight); background-color: #fff; }
+
+        /* Contenedores de Vistas */
+        #recipe-inputs { display: block; } /* Visible por defecto */
+        #history-view { display: none; }
+        
+        /* Advanced Section (Animación interna) */
+        #advanced-section {
+            display: none;
+            animation: slideDown 0.4s ease;
+        }
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Botones */
+        .main-btn {
+            width: 100%;
+            padding: 14px;
+            background-color: var(--btn-bg);
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: background 0.3s;
+        }
+        .main-btn:hover { background-color: var(--btn-hover); }
+
+        .secondary-btn {
+            background-color: var(--info-bg);
+            color: var(--highlight);
+            margin-top: 10px;
+        }
+        
+        .danger-btn {
+            background-color: #ffebee;
+            color: var(--danger);
+            margin-top: 10px;
+            border: 1px solid #ef9a9a;
+        }
+        .danger-btn:hover { background-color: #ffcdd2; }
+
+        .edit-btn {
+            background-color: var(--btn-bg);
+            color: white;
+            margin-top: 10px;
+        }
+
+        /* Resultados */
+        #result { display: none; margin-top: 30px; animation: fadeInResult 0.5s ease; }
+        @keyframes fadeInResult { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .info-card {
+            background-color: var(--info-bg);
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            border-left: 4px solid var(--highlight);
+            display: flex;
+            justify-content: space-around;
+            text-align: center;
+        }
+        .info-item h4 { margin: 0 0 5px 0; font-size: 0.8em; color: #6d4c41; }
+        .info-item span { font-weight: bold; font-size: 1.1em; }
+
+        .tips-box {
+            font-size: 0.85em;
+            color: #5d4037;
+            background-color: #fff3e0;
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            font-style: italic;
+        }
+
+        .step { display: flex; align-items: center; padding: 12px 0; border-bottom: 1px dashed #d7ccc8; }
+        .step:last-child { border-bottom: none; }
+        .step-time { width: 70px; font-weight: 700; color: var(--highlight); }
+        .step-desc { flex: 1; }
+        .step-weight { font-weight: 600; color: var(--primary-text); }
+        .step-add { font-size: 0.85em; color: #8d6e63; }
+
+        /* Icono café */
+        .coffee-bean {
+            width: 20px; height: 30px; background: var(--btn-bg);
+            border-radius: 50%; position: relative; margin: 0 auto 10px;
+            box-shadow: inset 2px -2px 0 rgba(0,0,0,0.2);
+        }
+        .coffee-bean:after {
+            content: ""; position: absolute; top: 5px; left: 50%; width: 2px; height: 20px;
+            background: #fff; transform: translateX(-50%) rotate(10deg); border-radius: 2px; opacity: 0.3;
+        }
+
+        /* --- ESTILOS HISTORIAL --- */
+        .history-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .history-item {
+            background: var(--info-bg);
+            padding: 15px;
+            border-radius: 10px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 1px solid transparent;
+            transition: 0.2s;
+        }
+        .history-item:hover {
+            border-color: var(--highlight);
+            background: white;
+        }
+        .hist-date-group { display: flex; flex-direction: column; }
+        .hist-date { font-weight: 600; font-size: 0.95em; }
+        .hist-time { font-size: 0.8em; color: #8d6e63; }
+        .hist-rating { 
+            background: var(--btn-bg); 
+            color: white; 
+            padding: 5px 10px; 
+            border-radius: 20px; 
+            font-size: 0.85em; 
+            font-weight: 600;
+        }
+
+        /* Detalle del historial */
+        #history-detail { display: none; }
+        .detail-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        .detail-obs { 
+            background: #fff3e0; 
+            padding: 15px; 
+            border-radius: 8px; 
+            font-size: 0.9em; 
+            font-style: italic;
+            margin-bottom: 20px;
+            border-left: 3px solid var(--highlight);
+        }
+        .back-btn { background: none; border: none; color: var(--highlight); font-weight: 600; cursor: pointer; padding: 0;}
+
+        /* Acciones en historial */
+        .history-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        /* --- MODAL GUARDAR / EDITAR --- */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(62, 39, 35, 0.6);
+            display: none;
+            justify-content: center;
+            align-items: flex-end; /* Mobile friendly bottom sheet style */
+            z-index: 1000;
+        }
+        .modal-content {
+            background: white;
+            width: 100%;
+            max-width: 600px;
+            padding: 30px;
+            border-radius: 20px 20px 0 0;
+            animation: slideUp 0.3s ease;
+        }
+        @media (min-width: 600px) {
+            .modal-overlay { align-items: center; }
+            .modal-content { border-radius: 20px; margin: 20px; }
+        }
+        @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+
+        .rating-input-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <header>
+            <div class="coffee-bean"></div>
+            <h1>Barista 4:6 Pro</h1>
+            <div class="subtitle">Receta inteligente para V60</div>
+            
+            <div class="tab-menu">
+                <button id="tab-pro" class="tab-btn active" onclick="setMode('pro')">Pro</button>
+                <button id="tab-adv" class="tab-btn" onclick="setMode('advanced')">Advanced</button>
+                <button id="tab-hist" class="tab-btn" onclick="setMode('history')">Historial</button>
+            </div>
+        </header>
+
+        <div id="recipe-inputs" class="fade-in">
+            <div class="section-title">Cantidades</div>
+            <div class="row">
+                <div class="col"><label>Café (g)</label><input type="number" id="coffee" value="20" min="1"></div>
+                <div class="col"><label>Agua (ml)</label><input type="number" id="water" value="300" min="1"></div>
+            </div>
+
+            <div class="section-title">El Grano</div>
+            <div class="row">
+                <div class="col">
+                    <label>Variedad</label>
+                    <select id="bean">
+                        <option value="">Desconocido</option>
+                        <option value="arabica">Arábica (Standard)</option>
+                        <option value="geisha">Geisha</option>
+                        <option value="robusta">Robusta</option>
+                        <option value="commercial">Comercial/Blend</option>
+                    </select>
+                </div>
+                <div class="col">
+                    <label>Proceso</label>
+                    <select id="process">
+                        <option value="">Desconocido</option>
+                        <option value="washed">Lavado (Washed)</option>
+                        <option value="natural">Natural</option>
+                        <option value="honey">Honey</option>
+                    </select>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col">
+                    <label>Nivel de Tueste</label>
+                    <select id="roast">
+                        <option value="">Desconocido</option>
+                        <option value="light">Claro (Light)</option>
+                        <option value="medium">Medio</option>
+                        <option value="dark">Oscuro (Dark)</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="section-title">Perfil en Taza</div>
+            <div class="row">
+                <div class="col">
+                    <label>Sabor (Fase 1)</label>
+                    <select id="flavor">
+                        <option value="standard">Balanceado</option>
+                        <option value="sweeter">Más Dulce</option>
+                        <option value="brighter">Más Ácido</option>
+                    </select>
+                </div>
+                <div class="col">
+                    <label>Fuerza (Fase 2)</label>
+                    <select id="strength">
+                        <option value="lighter">Ligero</option>
+                        <option value="stronger" selected>Medio</option>
+                        <option value="even_stronger">Intenso</option>
+                    </select>
+                </div>
+            </div>
+
+            <div id="advanced-section">
+                <div class="section-title">Parámetros Avanzados</div>
+                
+                <div class="row">
+                    <div class="col">
+                        <label>Altura (msnm)</label>
+                        <input type="number" id="altitude" placeholder="Ej: 1880">
+                    </div>
+                    <div class="col">
+                        <label>Temp. Ambiente (°C)</label>
+                        <input type="number" id="ambient" placeholder="Ej: 22">
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col">
+                        <label>Filtro</label>
+                        <select id="filter-type">
+                            <option value="brown">Papel Marrón (Natural)</option>
+                            <option value="white" selected>Papel Blanco</option>
+                            <option value="mesh">Malla de Acero</option>
+                            <option value="rice">Papel de Arroz</option>
+                        </select>
+                    </div>
+                    <div class="col">
+                        <label>Intervalos</label>
+                        <select id="interval-mode">
+                            <option value="fixed">Intervalos Fijos</option>
+                            <option value="variable">Intervalos Variables</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col">
+                        <label>Vertidos (Pulsos)</label>
+                        <select id="pours-count">
+                            <option value="auto">No especificado (Auto)</option>
+                            <option value="2">2 Vertidos</option>
+                            <option value="3">3 Vertidos</option>
+                            <option value="4">4 Vertidos</option>
+                            <option value="5">5 Vertidos (Estándar)</option>
+                            <option value="6">6 Vertidos</option>
+                            <option value="7">7 Vertidos</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <button class="main-btn" onclick="generateRecipe()">Generar Receta Optimizada</button>
+
+            <div id="result">
+                <div class="info-card">
+                    <div class="info-item"><h4>Temp. Agua</h4><span id="res-temp">92°C</span></div>
+                    <div class="info-item"><h4>Intervalo</h4><span id="res-interval">45s</span></div>
+                    <div class="info-item"><h4>Ratio</h4><span id="res-ratio">1:15</span></div>
+                </div>
+                <div id="tips-box" class="tips-box"></div>
+                <div id="steps-container"></div>
+                
+                <button class="main-btn secondary-btn" onclick="openSaveModal()">Guardar en historial</button>
+            </div>
+        </div>
+
+        <div id="history-view">
+            <div id="history-list-container">
+                <div class="section-title" style="margin-top:0">Recetas Guardadas</div>
+                <div id="history-list" class="history-list"></div>
+                <p id="no-history" style="text-align: center; color: #8d6e63; display:none;">No hay recetas guardadas aún.</p>
+            </div>
+
+            <div id="history-detail">
+                <div class="detail-header">
+                    <button class="back-btn" onclick="closeHistoryDetail()">← Volver</button>
+                    <div id="detail-date" style="font-size: 0.9em; color: #8d6e63;"></div>
+                </div>
+                <h3 style="margin-top:0; color:var(--btn-bg)">Detalles de la Taza <span id="detail-rating" style="float:right; font-size: 0.8em; background:var(--highlight); color:white; padding:3px 8px; border-radius:12px;"></span></h3>
+                
+                <div id="detail-obs" class="detail-obs"></div>
+                
+                <div class="info-card">
+                    <div class="info-item"><h4>Modo</h4><span id="det-mode">-</span></div>
+                    <div class="info-item"><h4>Ratio</h4><span id="det-ratio">-</span></div>
+                    <div class="info-item"><h4>Temp</h4><span id="det-temp">-</span></div>
+                </div>
+
+                <div class="section-title">Parámetros Usados</div>
+                <div id="detail-params" style="font-size: 0.9em; color: var(--primary-text);"></div>
+
+                <div class="history-actions">
+                    <button class="main-btn edit-btn" onclick="editCurrentHistoryItem()">Editar</button>
+                    <button class="main-btn danger-btn" onclick="deleteCurrentHistoryItem()">Eliminar</button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div id="save-modal" class="modal-overlay">
+        <div class="modal-content">
+            <h3 id="modal-title" style="margin-top:0;">Guardar en Historial</h3>
+            
+            <label>Observaciones</label>
+            <textarea id="save-obs" rows="3" placeholder="Ej: Quedó un poco ácido, probar molienda más fina..."></textarea>
+            
+            <label style="margin-top: 15px;">Calificación</label>
+            <div class="rating-input-group">
+                <input type="number" id="save-rating" placeholder="0 - 10" min="0" max="10" step="0.1" style="width: 100px;">
+                <span style="font-weight: 600; font-size: 1.2em;">/ 10</span>
+            </div>
+
+            <div class="row" style="margin-top: 25px;">
+                <button class="main-btn secondary-btn" style="margin-top:0" onclick="closeSaveModal()">Cancelar</button>
+                <button class="main-btn" style="margin-top:0" onclick="saveToHistory()">Guardar</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentMode = 'pro';
+        let currentRecipeData = null; // Receta temporal generada
+        let editingId = null; // ID si estamos editando
+        let viewingId = null; // ID que estamos viendo en detalle
+
+        function setMode(mode) {
+            const prevMode = currentMode;
+            currentMode = mode;
+            
+            const recipeInputs = document.getElementById('recipe-inputs');
+            const historyView = document.getElementById('history-view');
+            const advSection = document.getElementById('advanced-section');
+            
+            const btnPro = document.getElementById('tab-pro');
+            const btnAdv = document.getElementById('tab-adv');
+            const btnHist = document.getElementById('tab-hist');
+
+            // Reset active tabs
+            [btnPro, btnAdv, btnHist].forEach(btn => btn.classList.remove('active'));
+
+            // Ocultar todo primero para limpiar
+            // La animación se maneja con clases CSS
+            recipeInputs.style.display = 'none';
+            historyView.style.display = 'none';
+            
+            recipeInputs.classList.remove('fade-in');
+            historyView.classList.remove('fade-in');
+
+            if (mode === 'history') {
+                historyView.style.display = 'block';
+                // Trigger reflow para reiniciar animación
+                void historyView.offsetWidth; 
+                historyView.classList.add('fade-in');
+
+                btnHist.classList.add('active');
+                renderHistory(); 
+            } else {
+                recipeInputs.style.display = 'block';
+                // Trigger reflow
+                void recipeInputs.offsetWidth;
+                recipeInputs.classList.add('fade-in');
+
+                if (mode === 'advanced') {
+                    advSection.style.display = 'block';
+                    btnAdv.classList.add('active');
+                } else { // Pro
+                    advSection.style.display = 'none';
+                    btnPro.classList.add('active');
+                    // Reset inputs avanzados
+                    document.getElementById('pours-count').value = 'auto';
+                    document.getElementById('interval-mode').value = 'fixed';
+                }
+            }
+        }
+
+        function generateRecipe() {
+            // --- LECTURA DE INPUTS ---
+            const inputs = {
+                coffee: parseFloat(document.getElementById('coffee').value),
+                water: parseFloat(document.getElementById('water').value),
+                bean: document.getElementById('bean').value,
+                process: document.getElementById('process').value,
+                roast: document.getElementById('roast').value,
+                flavor: document.getElementById('flavor').value,
+                strength: document.getElementById('strength').value,
+                // Advanced
+                altitude: document.getElementById('altitude').value,
+                ambient: document.getElementById('ambient').value,
+                filterType: document.getElementById('filter-type').value,
+                intervalMode: document.getElementById('interval-mode').value,
+                poursCount: document.getElementById('pours-count').value
+            };
+
+            if (!inputs.coffee || !inputs.water) { alert("Por favor ingresa café y agua"); return; }
+
+            // --- LÓGICA DE TEMPERATURA ---
+            let temp = 92; 
+            if (inputs.roast === 'light') temp = 94;
+            else if (inputs.roast === 'medium') temp = 91;
+            else if (inputs.roast === 'dark') temp = 83;
+
+            if (inputs.bean === 'geisha' && inputs.roast !== 'dark') temp += 1;
+            if (inputs.bean === 'robusta') temp -= 2;
+
+            let boilingPoint = 100;
+            if (currentMode === 'advanced' && inputs.altitude) {
+                boilingPoint = 100 - (parseFloat(inputs.altitude) / 290);
+                if (temp > boilingPoint) temp = Math.floor(boilingPoint);
+            }
+
+            if (currentMode === 'advanced' && inputs.ambient) {
+                const amb = parseFloat(inputs.ambient);
+                if (amb < 18) temp += 2;
+                if (amb > 30) temp -= 1;
+            }
+
+            // --- LÓGICA DE INTERVALOS ---
+            let baseInterval = 45;
+            if (inputs.process === 'natural' || inputs.process === 'honey') baseInterval += 5;
+            if (inputs.roast === 'light') baseInterval += 5;
+            if (inputs.roast === 'dark') baseInterval -= 5;
+
+            // --- LÓGICA 4:6 MATEMÁTICA ---
+            const phase1Total = inputs.water * 0.4;
+            const phase2Total = inputs.water * 0.6;
+            let pours = [];
+
+            if (currentMode === 'advanced' && inputs.poursCount !== 'auto') {
+                const n = parseInt(inputs.poursCount);
+                if (n === 2) {
+                    pours.push(phase1Total, phase2Total);
+                } else if (n === 3) {
+                    pours.push(phase1Total, phase2Total/2, phase2Total/2);
+                } else {
+                    let p2_steps = n - 2;
+                    let p1_v1 = phase1Total * 0.5;
+                    let p1_v2 = phase1Total * 0.5;
+                    
+                    if (inputs.flavor === 'sweeter') { p1_v1 = phase1Total * (5/12); p1_v2 = phase1Total * (7/12); }
+                    if (inputs.flavor === 'brighter') { p1_v1 = phase1Total * (7/12); p1_v2 = phase1Total * (5/12); }
+                    pours.push(p1_v1, p1_v2);
+                    for(let i=0; i<p2_steps; i++) pours.push(phase2Total / p2_steps);
+                }
+            } else {
+                if (inputs.flavor === 'standard') pours.push(phase1Total * 0.5, phase1Total * 0.5);
+                else if (inputs.flavor === 'sweeter') pours.push(phase1Total * (5/12), phase1Total * (7/12));
+                else if (inputs.flavor === 'brighter') pours.push(phase1Total * (7/12), phase1Total * (5/12));
+
+                let p2_count = (inputs.strength === 'lighter') ? 1 : (inputs.strength === 'stronger' ? 2 : 3);
+                let p2_amount = phase2Total / p2_count;
+                for(let i=0; i<p2_count; i++) pours.push(p2_amount);
+            }
+            // --- RENDERIZADO ---
+            const finalRatio = (inputs.water/inputs.coffee).toFixed(1);
+            const intervalText = (inputs.intervalMode === 'variable') ? "Variable" : "~" + baseInterval + "s";
+
+            document.getElementById('res-temp').innerText = temp + "°C";
+            document.getElementById('res-interval').innerText = intervalText;
+            document.getElementById('res-ratio').innerText = "1:" + finalRatio;
+            
+            let tip = "Molienda media-gruesa.";
+            if (inputs.filterType === 'mesh' && currentMode === 'advanced') tip = "Malla metálica: muele más fino.";
+            if (inputs.bean === 'geisha') tip += " Vierte suave para no agitar los finos.";
+            document.getElementById('tips-box').innerText = "💡 " + tip;
+
+            const container = document.getElementById('steps-container');
+            container.innerHTML = '';
+
+            let currentTotal = 0;
+            let currentTime = 0;
+
+            pours.forEach((amount, idx) => {
+                currentTotal += amount;
+                let min = Math.floor(currentTime / 60);
+                let sec = currentTime % 60;
+                let timeStr = `${min}:${sec.toString().padStart(2, '0')}`;
+                
+                let stepInterval = baseInterval;
+                if (currentMode === 'advanced' && inputs.intervalMode === 'variable') {
+                    if (idx > 1) stepInterval += (idx - 1) * 5; 
+                }
+
+                const div = document.createElement('div');
+                div.className = 'step';
+                div.innerHTML = `
+                    <div class="step-time">${timeStr}</div>
+                    <div class="step-desc">
+                        <div class="step-weight">Verter hasta ${Math.round(currentTotal)}g</div>
+                        <div class="step-add">(Agregar +${Math.round(amount)}g)</div>
+                    </div>
+                `;
+                container.appendChild(div);
+                currentTime += stepInterval;
+            });
+
+            // Final step
+            let endMin = Math.floor((currentTime + 10) / 60);
+            let endSec = (currentTime + 10) % 60;
+            const finalDiv = document.createElement('div');
+            finalDiv.className = 'step';
+            finalDiv.innerHTML = `<div class="step-time">~${endMin}:${endSec.toString().padStart(2, '0')}</div><div class="step-desc"><div class="step-weight">Remover Dripper</div></div>`;
+            container.appendChild(finalDiv);
+
+            currentRecipeData = {
+                dateObj: new Date(),
+                mode: currentMode,
+                params: inputs,
+                result: { temp, interval: intervalText, ratio: finalRatio, steps: pours.length }
+            };
+
+            document.getElementById('result').style.display = 'block';
+            document.getElementById('result').scrollIntoView({behavior: 'smooth'});
+        }
+
+        // --- FUNCIONES HISTORIAL ---
+
+        function openSaveModal() {
+            editingId = null; // Modo guardar nuevo
+            document.getElementById('modal-title').innerText = "Guardar en Historial";
+            document.getElementById('save-modal').style.display = 'flex';
+            document.getElementById('save-obs').value = '';
+            document.getElementById('save-rating').value = '';
+        }
+
+        function closeSaveModal() {
+            document.getElementById('save-modal').style.display = 'none';
+        }
+
+        function saveToHistory() {
+            const obs = document.getElementById('save-obs').value;
+            const rating = document.getElementById('save-rating').value;
+
+            if (rating === '' || rating < 0 || rating > 10) {
+                alert("Por favor ingresa una calificación válida (0-10)");
+                return;
+            }
+
+            let history = JSON.parse(localStorage.getItem('baristaHistory')) || [];
+
+            if (editingId) {
+                // MODO EDICIÓN
+                const index = history.findIndex(r => r.id === editingId);
+                if (index !== -1) {
+                    history[index].observations = obs;
+                    history[index].rating = parseFloat(rating).toFixed(1);
+                    localStorage.setItem('baristaHistory', JSON.stringify(history));
+                    
+                    // Actualizar vista detalle si está abierta
+                    showHistoryDetail(editingId);
+                }
+                editingId = null;
+            } else {
+                // MODO NUEVO
+                const fullRecord = {
+                    ...currentRecipeData,
+                    id: Date.now(),
+                    observations: obs,
+                    rating: parseFloat(rating).toFixed(1)
+                };
+                history.unshift(fullRecord);
+                localStorage.setItem('baristaHistory', JSON.stringify(history));
+                
+                // Animación visual
+                const tabBtn = document.getElementById('tab-hist');
+                tabBtn.classList.add('tab-success');
+                setTimeout(() => { tabBtn.classList.remove('tab-success'); }, 1000);
+                
+                document.getElementById('result').style.display = 'none';
+                document.getElementById('recipe-inputs').scrollIntoView({behavior: 'smooth'});
+                alert("¡Receta guardada en Historial!");
+            }
+
+            closeSaveModal();
+        }
+
+        function renderHistory() {
+            const listContainer = document.getElementById('history-list');
+            const noHistoryMsg = document.getElementById('no-history');
+            const history = JSON.parse(localStorage.getItem('baristaHistory')) || [];
+
+            listContainer.innerHTML = '';
+
+            if (history.length === 0) {
+                noHistoryMsg.style.display = 'block';
+                return;
+            } else {
+                noHistoryMsg.style.display = 'none';
+            }
+
+            history.forEach(item => {
+                const date = new Date(item.dateObj);
+                const day = date.getDate().toString().padStart(2, '0');
+                const month = (date.getMonth() + 1).toString().padStart(2, '0');
+                const year = date.getFullYear().toString().slice(-2);
+                const hours = date.getHours().toString().padStart(2, '0');
+                const mins = date.getMinutes().toString().padStart(2, '0');
+
+                const div = document.createElement('div');
+                div.className = 'history-item';
+                div.onclick = () => showHistoryDetail(item.id);
+                div.innerHTML = `
+                    <div class="hist-date-group">
+                        <span class="hist-date">${day}/${month}/${year}</span>
+                        <span class="hist-time">${hours}:${mins} • ${item.params.bean}</span>
+                    </div>
+                    <span class="hist-rating">${item.rating}/10</span>
+                `;
+                listContainer.appendChild(div);
+            });
+            
+            document.getElementById('history-list-container').style.display = 'block';
+            document.getElementById('history-detail').style.display = 'none';
+        }
+
+        function showHistoryDetail(id) {
+            viewingId = id;
+            const history = JSON.parse(localStorage.getItem('baristaHistory')) || [];
+            const item = history.find(r => r.id === id);
+            if (!item) return;
+
+            const date = new Date(item.dateObj);
+            const dateStr = `${date.getDate()}/${date.getMonth()+1}/${date.getFullYear()} ${date.getHours()}:${date.getMinutes().toString().padStart(2,'0')}`;
+
+            document.getElementById('detail-date').innerText = dateStr;
+            document.getElementById('detail-rating').innerText = item.rating + "/10";
+            document.getElementById('detail-obs').innerText = item.observations || "Sin observaciones.";
+            
+            document.getElementById('det-mode').innerText = item.mode === 'advanced' ? 'Advanced' : 'Pro';
+            document.getElementById('det-ratio').innerText = "1:" + item.result.ratio;
+            document.getElementById('det-temp').innerText = item.result.temp + "°C";
+
+            let p = item.params;
+            let paramHTML = `
+                <ul style="padding-left: 20px; margin-top: 5px;">
+                    <li><b>Café:</b> ${p.coffee}g</li>
+                    <li><b>Agua:</b> ${p.water}ml</li>
+                    <li><b>Grano:</b> ${p.bean} (${p.process})</li>
+                    <li><b>Tueste:</b> ${p.roast}</li>
+            `;
+            
+            if (item.mode === 'advanced') {
+                if(p.altitude) paramHTML += `<li><b>Altitud:</b> ${p.altitude} msnm</li>`;
+                if(p.filterType) paramHTML += `<li><b>Filtro:</b> ${p.filterType}</li>`;
+                if(p.poursCount !== 'auto') paramHTML += `<li><b>Pulsos:</b> ${p.poursCount}</li>`;
+            }
+
+            paramHTML += `</ul>`;
+            document.getElementById('detail-params').innerHTML = paramHTML;
+
+            document.getElementById('history-list-container').style.display = 'none';
+            document.getElementById('history-detail').style.display = 'block';
+        }
+
+        function closeHistoryDetail() {
+            document.getElementById('history-detail').style.display = 'none';
+            document.getElementById('history-list-container').style.display = 'block';
+            viewingId = null;
+        }
+
+        // --- EDICIÓN Y ELIMINACIÓN ---
+        
+        function deleteCurrentHistoryItem() {
+            if (!viewingId) return;
+            if (confirm("¿Estás seguro de que quieres eliminar esta receta del historial?")) {
+                let history = JSON.parse(localStorage.getItem('baristaHistory')) || [];
+                history = history.filter(item => item.id !== viewingId);
+                localStorage.setItem('baristaHistory', JSON.stringify(history));
+                
+                closeHistoryDetail();
+                renderHistory();
+            }
+        }
+
+        function editCurrentHistoryItem() {
+            if (!viewingId) return;
+            const history = JSON.parse(localStorage.getItem('baristaHistory')) || [];
+            const item = history.find(r => r.id === viewingId);
+            if (!item) return;
+
+            editingId = viewingId;
+            document.getElementById('modal-title').innerText = "Editar Receta";
+            document.getElementById('save-obs').value = item.observations || '';
+            document.getElementById('save-rating').value = item.rating || '';
+            
+            document.getElementById('save-modal').style.display = 'flex';
+        }
+    </script>
+</body>
+</html>
